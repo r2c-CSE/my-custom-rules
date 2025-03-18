@@ -1,0 +1,17 @@
+rules:
+  - id: bash-find-docker-images
+    languages:
+      - bash
+    severity: ERROR
+    message: Detected usage of `$VAR`
+    patterns:
+      - pattern-either:
+          - pattern: |-
+              $IMG=$VAR
+              ...
+              docker run ${$IMG}
+          - pattern: docker run ... $VAR
+          - pattern: docker pull ... $VAR
+      - pattern-not: docker run ${$IMG}
+      - pattern-not: docker pull ${$IMG}
+      - focus-metavariable: $VAR
