@@ -1,0 +1,14 @@
+rules:
+  - id: bash-find-docker-images-propagation
+    mode: taint
+    pattern-sources:
+      - pattern-either:
+          - pattern: |
+              $IMG=$VAR
+    pattern-sinks:
+      - pattern: docker run ...
+      - pattern: docker pull ...
+    message: Semgrep found a docker image $VAR
+    languages:
+      - bash
+    severity: WARNING
