@@ -3,14 +3,16 @@ on:
   pull_request: {}
   push:
     branches:
-    - main
-    - master
+      - main
+      - master
     paths:
-    - .github/workflows/semgrep.yml
+      - .github/workflows/semgrep.yml
   schedule:
-  # random HH:MM to avoid a load spike on GitHub Actions at 00:00
-  - cron: 42 17 * * *
+    # random HH:MM to avoid a load spike on GitHub Actions at 00:00
+    - cron: 42 17 * * *
+
 name: Semgrep
+
 jobs:
   semgrep:
     name: semgrep/ci
@@ -22,5 +24,18 @@ jobs:
     container:
       image: semgrep/semgrep
     steps:
-    - uses: actions/checkout@v4
-    - run: semgrep publish rules/
+      - uses: actions/checkout@v4
+
+      - name: Validate rules
+        run: |
+          semgrep validate rules/ || {
+            echo "semgrep validate failed. Configuration is invalid."
+            exit 1
+          }
+
+      - name: Run Semgrep CI rule check
+        run: |
+          semgrep --error --config "p/semgrep-rule-ci"
+
+      - name: Run semgrep publish
+        run: semgrep publish rules/
